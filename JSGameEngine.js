@@ -99,7 +99,6 @@ class ObjectHandler {
         this.ctx = canvasRenderingContext;
 
         this.objectList = [];
-        this.removeList = [];
 
         this.deltaTime = 0;
         this.now = performance.now();
@@ -113,6 +112,7 @@ class ObjectHandler {
      * */
     addObject(object) {
         if(object instanceof ColliderObject) {
+            object.setObjectHandler(this);
             this.objectList.push(object);
         }
     }
@@ -123,7 +123,7 @@ class ObjectHandler {
      * @description remove object from handler. important! always use this function, never delete objects manually
      * */
     removeObject(object) {
-        this.removeList[this.removeList.length] = this.objectList.indexOf(object);
+        this.objectList.splice(this.objectList.indexOf(object), 1);
     }
 
     /**
@@ -141,18 +141,14 @@ class ObjectHandler {
 
         for(let i = 0; i < this.objectList.length; i++) {
             for(let j = 0; j < this.objectList.length; j++) {
-                if (this.objectList[i] !== this.objectList[j] &&
+                if (this.objectList[i] != null &&
+                    this.objectList[i] !== this.objectList[j] &&
                     this.objectList[i].collisionTagList[this.objectList[j].tag] &&
                     this.objectList[i].checkCollision(this.objectList[j])) {
                     this.objectList[i].onCollision(this.objectList[j]);
                 }
             }
         }
-
-        for(let i = 0; i < this.removeList.length; i++) {
-            this.objectList.splice(this.removeList[i], 1);
-        }
-        this.removeList = [];
     }
 
     /**
@@ -184,6 +180,10 @@ class Object {
         this.tag = tag;
 
         Object.count++;
+    }
+
+    setObjectHandler(handler) {
+        this.handler = handler;
     }
 
     update(deltaTime) {}
